@@ -4,7 +4,7 @@ import sys
 from apps import db
 from wtforms import Form
 from wtforms_alchemy import model_form_factory
-
+from apps.config import REGISTER_MODEL_MODULE
 ModelForm = model_form_factory(Form)
 
 
@@ -41,7 +41,7 @@ class Utils:
 
     @staticmethod
     def model_name_to_class(name: str):
-        all_classes = inspect.getmembers(sys.modules[__name__], inspect.isclass)
+        all_classes = inspect.getmembers(sys.modules[REGISTER_MODEL_MODULE], inspect.isclass)
         for cls in all_classes:
             if cls[0] == name:
                 return cls[1]
