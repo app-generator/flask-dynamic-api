@@ -1,4 +1,5 @@
 import inspect
+import json
 import sys
 
 from apps import db
@@ -48,3 +49,19 @@ class Utils:
                 return cls[1]
         # we are confident that never returns None
         return None
+    @staticmethod
+    def init_function(config, model_name):
+        return Utils.get_manager(config, model_name),\
+               Utils.get_class(config, model_name),\
+               Utils.get_form(config, model_name)
+
+    @staticmethod
+    def standard_request_body(request):
+        try:
+            body_of_req = request.json
+        except Exception:
+            if len(request.data) > 0:
+                body_of_req = json.loads(request.data)
+            else:
+                body_of_req = {}
+        return body_of_req
