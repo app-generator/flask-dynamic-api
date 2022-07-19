@@ -47,3 +47,7 @@ config_dict = {
     'Production': ProductionConfig,
     'Debug'     : DebugConfig
 }
+
+DYNAMIC_API = {
+
+}
