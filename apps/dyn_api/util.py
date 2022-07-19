@@ -2,11 +2,12 @@ import inspect
 import sys
 
 from apps import db
+from apps.config import REGISTER_MODEL_MODULE
+
+
 from wtforms import Form
 from wtforms_alchemy import model_form_factory
-from apps.config import REGISTER_MODEL_MODULE
 ModelForm = model_form_factory(Form)
-
 
 class Utils:
     @staticmethod
