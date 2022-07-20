@@ -3,13 +3,8 @@
 Copyright (c) 2019 - present AppSeed.us
 """
 import jwt
-from flask import render_template, redirect, request, url_for, current_app
+from flask import redirect, request, url_for, current_app
 from datetime import datetime
-from flask_login import (
-    current_user,
-    login_user,
-    logout_user
-)
 from flask_restx import Resource, Api
 
 from apps import db
@@ -19,10 +14,6 @@ from apps.authentication.models import Users
 from apps.authentication.util import verify_pass
 
 api = Api(blueprint)
-@blueprint.route('/logout')
-def logout():
-    logout_user()
-    return redirect(url_for('authentication_blueprint.login'))
 
 
 @api.route('/login', methods=['POST'])
