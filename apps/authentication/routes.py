@@ -3,7 +3,7 @@
 Copyright (c) 2019 - present AppSeed.us
 """
 import jwt
-from flask import redirect, request, url_for, current_app
+from flask import request, current_app
 from datetime import datetime
 from flask_restx import Resource, Api
 
