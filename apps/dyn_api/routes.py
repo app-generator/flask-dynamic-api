@@ -2,11 +2,11 @@
 """
 Copyright (c) 2019 - present AppSeed.us
 """
-import json
 
 from flask import request
 from werkzeug.datastructures import MultiDict
 
+from apps.authentication.auth_middleware import token_required
 from apps.dyn_api import blueprint
 from apps.dyn_api.util import Utils
 from flask_restx import Resource, Api
@@ -18,7 +18,7 @@ api = Api(blueprint)
 @api.route('/<string:model_name>', methods=['POST', 'GET', 'DELETE', 'PUT'])
 @api.route('/<string:model_name>/<int:model_id>', methods=['GET', 'DELETE', 'PUT'])
 class DynamicAPI(Resource):
-
+    @token_required
     def get(self, model_name: str, model_id: int = None):
         try:
             manager, cls, FormClass = Utils.init_function(config, model_name)
@@ -42,6 +42,7 @@ class DynamicAPI(Resource):
                    'success': True
                }, 200
 
+    @token_required
     def post(self, model_name: str):
         try:
             manager, cls, FormClass = Utils.init_function(config, model_name)
@@ -64,6 +65,7 @@ class DynamicAPI(Resource):
                    'success': True
                }, 200
 
+    @token_required
     def put(self, model_name: str, model_id: int):
         try:
             manager, cls, FormClass = Utils.init_function(config, model_name)
@@ -92,6 +94,7 @@ class DynamicAPI(Resource):
             'success': True
         }
 
+    @token_required
     def delete(self, model_name: str, model_id: int):
         try:
             manager, cls, FormClass = Utils.init_function(config, model_name)
