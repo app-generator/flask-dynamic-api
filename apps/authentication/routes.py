@@ -9,96 +9,93 @@ from flask_login import (
     login_user,
     logout_user
 )
+from flask_restx import Resource, Api
 
 from apps import db, login_manager
 from apps.authentication import blueprint
-from apps.authentication.forms import LoginForm, CreateAccountForm
+from apps.authentication.forms import CreateAccountForm
 from apps.authentication.models import Users
 
 from apps.authentication.util import verify_pass
 
-
-@blueprint.route('/register', methods=['GET', 'POST'])
-def register():
-    create_account_form = CreateAccountForm(request.form)
-    if 'register' in request.form:
-
-        username = request.form['username']
-        email = request.form['email']
-
-        # Check usename exists
-        user = Users.query.filter_by(username=username).first()
-        if user:
-            return render_template('accounts/register.html',
-                                   msg='Username already registered',
-                                   success=False,
-                                   form=create_account_form)
-
-        # Check email exists
-        user = Users.query.filter_by(email=email).first()
-        if user:
-            return render_template('accounts/register.html',
-                                   msg='Email already registered',
-                                   success=False,
-                                   form=create_account_form)
-
-        # else we can create the user
-        user = Users(**request.form)
-        db.session.add(user)
-        db.session.commit()
-
-        # Delete user from session
-        logout_user()
-
-        return render_template('accounts/register.html',
-                               msg='User created successfully.',
-                               success=True,
-                               form=create_account_form)
-
-    else:
-        return render_template('accounts/register.html', form=create_account_form)
-
-
+api = Api(blueprint)
 @blueprint.route('/logout')
 def logout():
     logout_user()
     return redirect(url_for('authentication_blueprint.login'))
 
-@blueprint.route("/login", methods=["POST"])
-def login():
-    try:
-        data = request.json
-        if not data:
+
+@api.route('/login', methods=['POST'])
+class Login(Resource):
+    def post(self):
+        try:
+            data = request.json
+            if not data:
+                return {
+                           'message': 'username or password is missing',
+                           "data": None,
+                           'success': False
+                       }, 400
+            # validate input
+            user = Users.query.filter_by(username=data.get('username')).first()
+            if user and verify_pass(data.get('password'), user.password):
+                try:
+                    # token should expire after 24 hrs
+                    user.api_token = jwt.encode(
+                        {"user_id": user.id},
+                        current_app.config["SECRET_KEY"],
+                        algorithm="HS256"
+                    )
+                    return {
+                        "message": "Successfully fetched auth token",
+                        "success": True,
+                        "data": user.api_token
+                    }
+                except Exception as e:
+                    return {
+                               "error": "Something went wrong",
+                               "success": False,
+                               "message": str(e)
+                           }, 500
             return {
-                       'message': 'username or password is missing',
-                       "data": None,
+                       'message': 'username or password is wrong',
                        'success': False
-                   }, 400
-        # validate input
-        user = Users.query.filter_by(username=data.get('username')).first()
-        if user and verify_pass(data.get('password'), user.password):
-            try:
-                # token should expire after 24 hrs
-                user.api_token = jwt.encode(
-                    {"user_id": user.id},
-                    current_app.config["SECRET_KEY"],
-                    algorithm="HS256"
-                )
+                   }, 403
+        except Exception as e:
+            return {
+                       "error": "Something went wrong",
+                       "success": False,
+                       "message": str(e)
+                   }, 500
+
+@api.route('/register', methods=['GET', 'POST'])
+class Signup(Resource):
+    def post(self):
+        try:
+            data = request.json
+            username = data['username']
+            email = data['email']
+            user_by_username = Users.query.filter_by(username=username).first()
+            if user_by_username:
                 return {
-                    "message": "Successfully fetched auth token",
-                    "data": user.api_token
-                }
-            except Exception as e:
+                           'message': 'username already exist.',
+                           'success': False
+                       }, 400
+            user_by_email = Users.query.filter_by(email=email).first()
+            if user_by_email:
                 return {
-                           "error": "Something went wrong",
-                           "message": str(e)
-                       }, 500
-        return {
-                   'message': 'username or password is wrong',
-                   'success': False
-               }, 403
-    except Exception as e:
-        return {
-                   "error": "Something went wrong",
-                   "message": str(e)
-               }, 500
+                           'message': 'email already exist.',
+                           'success': False,
+                       }, 400
+            user = Users(**data)
+            db.session.add(user)
+            db.session.commit()
+            return {
+                'message': 'you have signed up.',
+                'success': True
+            }
+        except Exception as e:
+            return {
+                'message': str(e),
+                'success': False,
+            }
