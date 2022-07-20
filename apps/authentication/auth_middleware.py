@@ -19,7 +19,7 @@ def token_required(func):
         try:
             data = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=["HS256"])
             current_user = Users.query.filter_by(id=data['user_id']).first()
-            if current_user is None:
+            if current_user is None or current_user:
                 return {
                            'message': 'Invalid token',
                            'data': None,

@@ -11,9 +11,8 @@ from flask_login import (
 )
 from flask_restx import Resource, Api
 
-from apps import db, login_manager
+from apps import db
 from apps.authentication import blueprint
-from apps.authentication.forms import CreateAccountForm
 from apps.authentication.models import Users
 
 from apps.authentication.util import verify_pass
@@ -41,7 +40,7 @@ class Login(Resource):
             if user and verify_pass(data.get('password'), user.password):
                 try:
                     # token should expire after 24 hrs
-                    user.api_token = jwt.encode(
+                    api_token = jwt.encode(
                         {"user_id": user.id},
                         current_app.config["SECRET_KEY"],
                         algorithm="HS256"
@@ -49,7 +48,7 @@ class Login(Resource):
                     return {
                         "message": "Successfully fetched auth token",
                         "success": True,
-                        "data": user.api_token
+                        "data": api_token
                     }
                 except Exception as e:
                     return {
@@ -93,9 +92,9 @@ class Signup(Resource):
             return {
                 'message': 'you have signed up.',
                 'success': True
-            }
+            }, 200
         except Exception as e:
             return {
                 'message': str(e),
                 'success': False,
-            }
+            }, 500
