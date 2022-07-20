@@ -4,6 +4,7 @@ Copyright (c) 2019 - present AppSeed.us
 """
 import jwt
 from flask import render_template, redirect, request, url_for, current_app
+from datetime import datetime
 from flask_login import (
     current_user,
     login_user,
@@ -41,7 +42,8 @@ class Login(Resource):
                 try:
                     # token should expire after 24 hrs
                     api_token = jwt.encode(
-                        {"user_id": user.id},
+                        {"user_id": user.id,
+                         "init_date": int(datetime.utcnow().timestamp())},
                         current_app.config["SECRET_KEY"],
                         algorithm="HS256"
                     )
