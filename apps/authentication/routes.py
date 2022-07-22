@@ -32,16 +32,10 @@ class Login(Resource):
             if user and verify_pass(data.get('password'), user.password):
                 try:
                     # token should expire after 24 hrs
-                    api_token = jwt.encode(
-                        {"user_id": user.id,
-                         "init_date": int(datetime.utcnow().timestamp())},
-                        current_app.config["SECRET_KEY"],
-                        algorithm="HS256"
-                    )
                     return {
                         "message": "Successfully fetched auth token",
                         "success": True,
-                        "data": api_token
+                        "data": user.api_token
                     }
                 except Exception as e:
                     return {
@@ -80,6 +74,15 @@ class Signup(Resource):
                            'success': False,
                        }, 400
             user = Users(**data)
+            now = int(datetime.utcnow().timestamp())
+            api_token = jwt.encode(
+                {"user_id": user.id,
+                 "init_date": now},
+                current_app.config["SECRET_KEY"],
+                algorithm="HS256"
+            )
+            user.api_token = api_token
+            user.api_token_ts = now
             db.session.add(user)
             db.session.commit()
             return {
