@@ -74,6 +74,13 @@ class DynamicAPI(Resource):
                        'message': 'this endpoint does not config or not exist!'
                    }, 404
         body_of_req = Utils.standard_request_body(request)
+        form = FormClass(MultiDict(body_of_req))
+        if not form.validate():
+            return {
+                       'message': form.errors,
+                       'success': False
+                   }, 404
+
         to_edit_row = manager.filter_by(id=model_id)
 
         if to_edit_row is None:
