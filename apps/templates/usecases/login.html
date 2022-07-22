@@ -1,0 +1,43 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>login</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Login</h1>
+        <form id="form">
+            <div>
+                <label for="username">username</label> 
+                <input id="username" name="username"> 
+            </div>
+            <div>
+                <label for="password">password</label> 
+                <input id="password" type="password" name="password"> 
+            </div>
+            <input type="submit" value="login">
+        </form>
+    </div>
+    <script>
+        // request to server
+        document.getElementById('form').onsubmit = (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target)
+            fetch('/login',{
+                body: formData,
+                method: 'post'
+            })
+                .then(response => response.json())
+                .then(res => { // ok request
+                    console.log(res)
+
+                    // save token to localStorage
+                    localStorage.setItem('token',res.toString())
+                }) 
+                .catch(err => console.log(err)) // bad request
+        }
+    </script>
+</body>
+</html>
