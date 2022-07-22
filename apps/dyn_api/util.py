@@ -59,6 +59,8 @@ class Utils:
     def standard_request_body(request):
         try:
             body_of_req = request.json
+            if not body_of_req:
+                raise Exception()
         except Exception:
             if len(request.data) > 0:
                 body_of_req = json.loads(request.data)
