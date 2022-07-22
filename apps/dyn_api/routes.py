@@ -23,7 +23,6 @@ api = Api(blueprint)
 @api.route('/<string:model_name>', methods=['POST', 'GET', 'DELETE', 'PUT'])
 @api.route('/<string:model_name>/<int:model_id>', methods=['GET', 'DELETE', 'PUT'])
 class DynamicAPI(Resource):
-    @token_required
     def get(self, model_name: str, model_id: int = None):
         try:
             manager, cls, FormClass = Utils.init_function(config, model_name)
