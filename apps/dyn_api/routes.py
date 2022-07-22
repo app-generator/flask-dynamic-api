@@ -9,10 +9,9 @@ from flask import request, current_app
 from werkzeug.datastructures import MultiDict
 from apps.authentication.models import Users
 
-from apps.authentication.auth_middleware import token_required
 from apps.authentication.util import verify_pass
 from apps.dyn_api import blueprint
-from apps.dyn_api.util import Utils
+from apps.dyn_api.util import Utils, token_required, generate_token
 from flask_restx import Resource, Api
 from apps.config import DYNAMIC_API as config
 from apps import db
@@ -142,6 +141,14 @@ class Login(Resource):
             user = Users.query.filter_by(username=data.get('username')).first()
             if user and verify_pass(data.get('password'), user.password):
                 try:
+
+                    # Empty or null Token 
+                    if not user.api_token or user.api_token == '':
+
+                        user.api_token    = generate_token( user.id )
+                        user.api_token_ts = int(datetime.utcnow().timestamp())
+                        db.session.commit()
+
                     # token should expire after 24 hrs
                     return {
                         "message": "Successfully fetched auth token",
@@ -185,17 +192,23 @@ class Signup(Resource):
                            'success': False,
                        }, 400
             user = Users(**data)
-            now = int(datetime.utcnow().timestamp())
-            api_token = jwt.encode(
-                {"user_id": user.id,
-                 "init_date": now},
-                current_app.config["SECRET_KEY"],
-                algorithm="HS256"
-            )
-            user.api_token = api_token
-            user.api_token_ts = now
+
+            #now = int(datetime.utcnow().timestamp()) 
+            #api_token = jwt.encode(
+            #    {"user_id": user.id,
+            #     "init_date": now},
+            #    current_app.config["SECRET_KEY"],
+            #    algorithm="HS256"
+            #)
+
             db.session.add(user)
             db.session.commit()
+
+            user.api_token    = generate_token( user.id )
+            user.api_token_ts = int(datetime.utcnow().timestamp())
+
+            db.session.commit()
+            
             return {
                 'message': 'you have signed up.',
                 'success': True
