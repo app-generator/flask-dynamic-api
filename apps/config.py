@@ -4,7 +4,7 @@ Copyright (c) 2019 - present AppSeed.us
 """
 
 import os
-import apps.dyn_api.models as DYNAMIC_API_MODELS_MODULE # should import to add models.py of dyn_api to runtime modules
+import apps.models as DYNAMIC_API_MODELS_MODULE # should import to add models.py of dyn_api to runtime modules
 
 class Config(object):
 
@@ -52,5 +52,6 @@ config_dict = {
 REGISTER_MODEL_MODULE = DYNAMIC_API_MODELS_MODULE.__name__
 
 DYNAMIC_API = {
-    'books': 'Book'
+    'books': 'Book',
+    'cities': 'City',
 }
