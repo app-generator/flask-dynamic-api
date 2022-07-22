@@ -2,95 +2,119 @@
 """
 Copyright (c) 2019 - present AppSeed.us
 """
-import jwt
-from flask import request, current_app
-from datetime import datetime
-from flask_restx import Resource, Api
 
-from apps import db
+from flask import render_template, redirect, request, url_for
+from flask_login import (
+    current_user,
+    login_user,
+    logout_user
+)
+
+from apps import db, login_manager
 from apps.authentication import blueprint
+from apps.authentication.forms import LoginForm, CreateAccountForm
 from apps.authentication.models import Users
 
 from apps.authentication.util import verify_pass
 
-api = Api(blueprint)
+@blueprint.route('/')
+def route_default():
+    return redirect(url_for('authentication_blueprint.login'))
+
+# Login & Registration
+
+@blueprint.route('/login', methods=['GET', 'POST'])
+def login():
+    login_form = LoginForm(request.form)
+    if 'login' in request.form:
+
+        # read form data
+        username = request.form['username']
+        password = request.form['password']
+
+        # Locate user
+        user = Users.query.filter_by(username=username).first()
+
+        # Check the password
+        if user and verify_pass(password, user.password):
+
+            login_user(user)
+            return redirect(url_for('authentication_blueprint.route_default'))
+
+        # Something (user or pass) is not ok
+        return render_template('accounts/login.html',
+                               msg='Wrong user or password',
+                               form=login_form)
+
+    if not current_user.is_authenticated:
+        return render_template('accounts/login.html',
+                               form=login_form)
+    return redirect(url_for('home_blueprint.index'))
 
 
-@api.route('/login', methods=['POST'])
-class Login(Resource):
-    def post(self):
-        try:
-            data = request.json
-            if not data:
-                return {
-                           'message': 'username or password is missing',
-                           "data": None,
-                           'success': False
-                       }, 400
-            # validate input
-            user = Users.query.filter_by(username=data.get('username')).first()
-            if user and verify_pass(data.get('password'), user.password):
-                try:
-                    # token should expire after 24 hrs
-                    return {
-                        "message": "Successfully fetched auth token",
-                        "success": True,
-                        "data": user.api_token
-                    }
-                except Exception as e:
-                    return {
-                               "error": "Something went wrong",
-                               "success": False,
-                               "message": str(e)
-                           }, 500
-            return {
-                       'message': 'username or password is wrong',
-                       'success': False
-                   }, 403
-        except Exception as e:
-            return {
-                       "error": "Something went wrong",
-                       "success": False,
-                       "message": str(e)
-                   }, 500
+@blueprint.route('/register', methods=['GET', 'POST'])
+def register():
+    create_account_form = CreateAccountForm(request.form)
+    if 'register' in request.form:
 
-@api.route('/register', methods=['GET', 'POST'])
-class Signup(Resource):
-    def post(self):
-        try:
-            data = request.json
-            username = data['username']
-            email = data['email']
-            user_by_username = Users.query.filter_by(username=username).first()
-            if user_by_username:
-                return {
-                           'message': 'username already exist.',
-                           'success': False
-                       }, 400
-            user_by_email = Users.query.filter_by(email=email).first()
-            if user_by_email:
-                return {
-                           'message': 'email already exist.',
-                           'success': False,
-                       }, 400
-            user = Users(**data)
-            now = int(datetime.utcnow().timestamp())
-            api_token = jwt.encode(
-                {"user_id": user.id,
-                 "init_date": now},
-                current_app.config["SECRET_KEY"],
-                algorithm="HS256"
-            )
-            user.api_token = api_token
-            user.api_token_ts = now
-            db.session.add(user)
-            db.session.commit()
-            return {
-                'message': 'you have signed up.',
-                'success': True
-            }, 200
-        except Exception as e:
-            return {
-                'message': str(e),
-                'success': False,
-            }, 500
+        username = request.form['username']
+        email = request.form['email']
+
+        # Check usename exists
+        user = Users.query.filter_by(username=username).first()
+        if user:
+            return render_template('accounts/register.html',
+                                   msg='Username already registered',
+                                   success=False,
+                                   form=create_account_form)
+
+        # Check email exists
+        user = Users.query.filter_by(email=email).first()
+        if user:
+            return render_template('accounts/register.html',
+                                   msg='Email already registered',
+                                   success=False,
+                                   form=create_account_form)
+
+        # else we can create the user
+        user = Users(**request.form)
+        db.session.add(user)
+        db.session.commit()
+
+        # Delete user from session
+        logout_user()
+
+        return render_template('accounts/register.html',
+                               msg='User created successfully.',
+                               success=True,
+                               form=create_account_form)
+
+    else:
+        return render_template('accounts/register.html', form=create_account_form)
+
+
+@blueprint.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('authentication_blueprint.login'))
+
+# Errors
+
+@login_manager.unauthorized_handler
+def unauthorized_handler():
+    return render_template('home/page-403.html'), 403
+
+
+@blueprint.errorhandler(403)
+def access_forbidden(error):
+    return render_template('home/page-403.html'), 403
+
+
+@blueprint.errorhandler(404)
+def not_found_error(error):
+    return render_template('home/page-404.html'), 404
+
+
+@blueprint.errorhandler(500)
+def internal_error(error):
+    return render_template('home/page-500.html'), 500
