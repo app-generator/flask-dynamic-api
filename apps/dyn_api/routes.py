@@ -19,8 +19,8 @@ from apps import db
 api = Api(blueprint)
 
 
-@api.route('/<string:model_name>', methods=['POST', 'GET', 'DELETE', 'PUT'])
-@api.route('/<string:model_name>/<int:model_id>', methods=['GET', 'DELETE', 'PUT'])
+@api.route('/<string:model_name>/', methods=['POST', 'GET', 'DELETE', 'PUT'])
+@api.route('/<string:model_name>/<int:model_id>/', methods=['GET', 'DELETE', 'PUT'])
 class DynamicAPI(Resource):
     def get(self, model_name: str, model_id: int = None):
         try:
