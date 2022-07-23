@@ -72,10 +72,10 @@
     const modelName = 'books'
     const token = localStorage.getItem('token') || ''
     const itemContainer = document.querySelector('.list-group')
-    fetch(`/api/${modelName}`,{
+    fetch(`/api/${modelName}/`,{
         method: 'GET',
         headers: {
-            'Authorization': `token ${token}`
+            'Authorization': `${token}`
         }
     })
         .then((response) => {
@@ -111,7 +111,7 @@
             e.preventDefault()
             const modelName = 'books'
             const formData = new FormData(e.target)
-            let url = `/api/${modelName}`
+            let url = `/api/${modelName}/`
 
             if (requestAction === 'put')
                 url += `/${formData.get('id')}`
@@ -121,7 +121,7 @@
                 method: requestAction,
                 body: formData,
                 headers: {
-                    'Authorization': `token ${token}`
+                    'Authorization': `${token}`
                 }
             })
                 .then((response) => {

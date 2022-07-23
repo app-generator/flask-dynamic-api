@@ -12,10 +12,10 @@ document.querySelector('.list-group').addEventListener('click' , (e) => {
 
 const deleteAction = (id) => {
     const modelName = 'books'
-    fetch(`/api/${modelName}/${id}`,{
+    fetch(`/api/${modelName}/${id}/`,{
         method: 'DELETE',
         headers: {
-            'Authorization': `token ${token}`
+            'Authorization': `${token}`
         }
     })
         .then(response => response.json())
