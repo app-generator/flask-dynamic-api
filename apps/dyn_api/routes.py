@@ -19,8 +19,8 @@ from apps import db
 api = Api(blueprint)
 
 
-@api.route('/<string:model_name>', methods=['POST', 'GET', 'DELETE', 'PUT'])
-@api.route('/<string:model_name>/<int:model_id>', methods=['GET', 'DELETE', 'PUT'])
+@api.route('/<string:model_name>/', methods=['POST', 'GET', 'DELETE', 'PUT'])
+@api.route('/<string:model_name>/<int:model_id>/', methods=['GET', 'DELETE', 'PUT'])
 class DynamicAPI(Resource):
     def get(self, model_name: str, model_id: int = None):
         try:
@@ -56,8 +56,14 @@ class DynamicAPI(Resource):
         body_of_req = Utils.standard_request_body(request)
         form = FormClass(MultiDict(body_of_req))
         if form.validate():
-            thing = cls(**body_of_req)
-            Utils.add_row_to_db(thing, manager)
+            try:
+                obj = cls(**body_of_req)
+                Utils.add_row_to_db(obj, manager)
+            except Exception as e:
+                return {
+                        'message': str(e),
+                        'success': False
+                    }, 400                    
         else:
             return {
                        'message': form.errors,
@@ -131,6 +137,10 @@ class Login(Resource):
     def post(self):
         try:
             data = request.form
+            
+            if not data:
+                data = request.json
+
             if not data:
                 return {
                            'message': 'username or password is missing',
