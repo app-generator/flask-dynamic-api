@@ -131,6 +131,10 @@ class Login(Resource):
     def post(self):
         try:
             data = request.form
+            
+            if not data:
+                data = request.json
+
             if not data:
                 return {
                            'message': 'username or password is missing',
