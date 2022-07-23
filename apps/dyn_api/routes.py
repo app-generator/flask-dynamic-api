@@ -130,7 +130,7 @@ class DynamicAPI(Resource):
 class Login(Resource):
     def post(self):
         try:
-            data = request.json
+            data = request.form
             if not data:
                 return {
                            'message': 'username or password is missing',
