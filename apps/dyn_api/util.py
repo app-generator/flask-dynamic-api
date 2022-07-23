@@ -64,7 +64,7 @@ class Utils:
     @staticmethod
     def standard_request_body(request):
         try:
-            body_of_req = request.json
+            body_of_req = request.form
             if not body_of_req:
                 raise Exception()
         except Exception:
