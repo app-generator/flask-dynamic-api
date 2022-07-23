@@ -40,8 +40,8 @@
                 </div>
                 <div class="card-body">
 
-                  <form role="form text-left" method="post" action="">
-                    
+                  <form role="form text-left" method="post" action="/login">
+                    <input type="hidden" name="login">
                     {{ form.hidden_tag() }}
 
                     <label>Username</label>
@@ -97,9 +97,14 @@
       method: 'POST'
     })
       .then(response => response.json())
-      .then(res => console.log(res))
+      .then(res => {
+          console.log(res)
+
+          // store token in localStorage
+          localStorage.setItem('token',res['data'])
+      })
       .catch(err => console.log(err))
-    {#e.target.submit()#}
+    e.target.submit()
   }
 </script>
 {% endblock javascripts %}
