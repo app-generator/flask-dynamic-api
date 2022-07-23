@@ -56,8 +56,14 @@ class DynamicAPI(Resource):
         body_of_req = Utils.standard_request_body(request)
         form = FormClass(MultiDict(body_of_req))
         if form.validate():
-            thing = cls(**body_of_req)
-            Utils.add_row_to_db(thing, manager)
+            try:
+                obj = cls(**body_of_req)
+                Utils.add_row_to_db(obj, manager)
+            except Exception as e:
+                return {
+                        'message': str(e),
+                        'success': False
+                    }, 400                    
         else:
             return {
                        'message': form.errors,
