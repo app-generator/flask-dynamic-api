@@ -16,7 +16,9 @@
         <div class="card">
           <div class="card-header text-center pb-0 px-3">
             <h6 class="mb-0">
-                <a class="btn btn-link text-dark px-3 mb-0" href="javascript:;"><i class="fas fa-plus text-success me-2" aria-hidden="true"></i>Add Item</a>
+                <a class="btn btn-link text-dark px-3 mb-0" href="javascript:;" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                    <i class="fas fa-plus text-success me-2" aria-hidden="true"></i>Add Item
+                </a>
             </h6>
           </div>
           <div class="card-body pt-4 p-3">
@@ -37,29 +39,26 @@
 
   </div>
 
-<div class="modal" tabindex="-1">
-  <div class="modal-dialog">
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
+      <form id="form">
       <div class="modal-header">
-        <h5 class="modal-title">Modal title</h5>
+        <h5 class="modal-title" id="exampleModalLabel">Add</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <form id="edit-form">
           <div class="modal-body">
+              <input id="id" name="id" type="hidden" >
             <div class="mb-3">
                 <label for="name">Name</label>
                 <input id="name" class="form-control" name="name">
             </div>
-            <div class="mb-3">
-                <label for="year">year</label>
-                <input id="year" class="form-control" name="year">
-            </div>
           </div>
-      </form>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
+        <input type="submit" class="btn btn-primary" value="Save changes">
       </div>
+    </form>
     </div>
   </div>
 </div>
@@ -67,9 +66,10 @@
 
 <!-- Specific JS goes HERE --> 
 {% block javascripts %}
-
 <script>
-    const modelName = 'book'
+    let requestAction = 'post' // for update/add record
+    let data = []
+    const modelName = 'books'
     const token = localStorage.getItem('token') || ''
     const itemContainer = document.querySelector('.list-group')
     fetch(`/api/${modelName}`,{
@@ -80,21 +80,23 @@
     })
         .then((response) => {
                 if(!response.ok)
-                    return response.text().then(text => { throw new Error(text) })
+                    return response.json().then(text => { throw new Error(text) })
                 else
-                    return response.text()
+                    return response.json()
             })
         .then((res) => {
-            res.forEach((book) => {
+            itemContainer.innerHTML = ''
+            data = res.data
+            res.data.forEach((book) => {
                     const item = `<li class="list-group-item border-0 d-flex p-4 mb-2 bg-gray-100 border-radius-lg">
                         <div class="d-flex flex-column">
-                          <h6 id="model-name" class="mb-3 text-sm">${book.name}</h6>
-                          <span class="text-xs">Year: <span class="text-dark ms-sm-2 font-weight-bold" id="model-detail">${book.year}</span></span>
+                          <span class="text-xs">id: <span class="text-dark ms-sm-2 font-weight-bold" id="model-id">${book.id}</span></span>
+                          <span class="text-xs">name: <span class="text-dark ms-sm-2 font-weight-bold" id="model-name">${book.name}</span></span>
                         </div>
                         <div class="ms-auto text-end">
-                          <a class="btn btn-link text-danger text-gradient px-3 mb-0 delete" href="javascript:;" id="${book.id}"
-                                data-bs-toggle="modal" data-bs-target="#exampleModal"><i class="far fa-trash-alt me-2"></i>Delete</a>
-                          <a class="btn btn-link text-dark px-3 mb-0 edit" href="javascript:;" id="${book.id}"><i class="fas fa-pencil-alt text-dark me-2" aria-hidden="true"></i>Edit</a>
+                          <a class="btn btn-link text-danger text-gradient px-3 mb-0 delete" href="javascript:;" id="${book.id}"><i class="far fa-trash-alt me-2"></i>Delete</a>
+                          <a class="btn btn-link text-dark px-3 mb-0 edit" href="javascript:;" id="${book.id}"
+                                data-bs-toggle="modal" data-bs-target="#exampleModal"><i class="fas fa-pencil-alt text-dark me-2" aria-hidden="true"></i>Edit</a>
                         </div>
                       </li>`
 
@@ -105,10 +107,18 @@
             console.log(err)
         })
 
-        document.getElementById('edit-form').onsubmit = (e) => {
-        const formData = new FormData(e.target)
-            fetch(`/api/edit/`,{
-                method: 'POST',
+        document.getElementById('form').onsubmit = (e) => {
+            e.preventDefault()
+            const modelName = 'books'
+            const formData = new FormData(e.target)
+            let url = `/api/${modelName}`
+
+            if (requestAction === 'put')
+                url += `/${formData.get('id')}`
+            else
+                formData.delete('id')
+            fetch(url,{
+                method: requestAction,
                 body: formData,
                 headers: {
                     'Authorization': `token ${token}`
@@ -120,10 +130,15 @@
                     else
                         return response.text()
                 })
-                .then(res => {console.log(res)})
+                .then(res => {
+                    location.reload()
+                    console.log(res)
+                })
                 .catch(err => {console.log(err)})
         }
 
 </script>
+<script src="{{ config.ASSETS_ROOT }}/js/model.js"></script>
+
 
 {% endblock javascripts %}

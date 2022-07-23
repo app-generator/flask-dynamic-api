@@ -2,7 +2,8 @@
 document.querySelector('.list-group').addEventListener('click' , (e) => {
     if (e.target.nodeName === 'A') {
         if (e.target.className.includes('edit')) {
-            editAction()
+            editAction(e.target.id)
+            requestAction = 'put'
         } else if (e.target.className.includes('delete'))
             deleteAction(e.target.id)
 
@@ -10,16 +11,26 @@ document.querySelector('.list-group').addEventListener('click' , (e) => {
 })
 
 const deleteAction = (id) => {
-    fetch(`/api/${id}`,{
-        method: 'DELETE'
+    const modelName = 'books'
+    fetch(`/api/${modelName}/${id}`,{
+        method: 'DELETE',
+        headers: {
+            'Authorization': `token ${token}`
+        }
     })
         .then(response => response.json())
-        .then(res => {console.log(res)})
+        .then(res => {
+            location.reload()
+            console.log(res)
+        })
         .catch(err => {console.log(err)})
 }
 
-const editAction =  () => {
+const editAction =  (id) => {
     // get data from template
-    document.getElementById('name').value = document.getElementById('model-name')
-    document.getElementById('year').value = document.getElementById('model-detail')
+    const item = data.filter(d => d.id.toString() === id)[0]
+    console.log(item,data)
+    document.getElementById('name').value = item.name
+    document.getElementById('id').value = item.id
+
 }
