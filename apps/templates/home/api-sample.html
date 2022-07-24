@@ -114,7 +114,7 @@
             let url = `/api/${modelName}/`
 
             if (requestAction === 'put')
-                url += `/${formData.get('id')}`
+                url += `${formData.get('id')}`
             else
                 formData.delete('id')
             fetch(url,{

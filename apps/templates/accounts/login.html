@@ -89,6 +89,15 @@
 <!-- Specific JS goes HERE --> 
 {% block javascripts %}
 <script>
+
+    const asyncLocalStorage = {
+        setItem: function (key, value) {
+            return Promise.resolve().then(function () {
+                localStorage.setItem(key, value);
+            });
+        }
+    }
+
   document.getElementsByTagName('form')[0].onsubmit = (e) => {
     e.preventDefault()
     const formData = new FormData(e.target)
@@ -101,10 +110,10 @@
           console.log(res)
 
           // store token in localStorage
-          localStorage.setItem('token',res['data'])
+          asyncLocalStorage.setItem('token',res['data'])
+              .then(result => {e.target.submit()})
       })
       .catch(err => console.log(err))
-    e.target.submit()
   }
 </script>
 {% endblock javascripts %}
