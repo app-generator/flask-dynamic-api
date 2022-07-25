@@ -83,12 +83,6 @@ class DynamicAPI(Resource):
                        'message': 'this endpoint does not config or not exist!'
                    }, 404
         body_of_req = Utils.standard_request_body(request)
-        form = FormClass(MultiDict(body_of_req))
-        if not form.validate():
-            return {
-                       'message': form.errors,
-                       'success': False
-                   }, 404
 
         to_edit_row = manager.filter_by(id=model_id)
 
@@ -98,13 +92,22 @@ class DynamicAPI(Resource):
                        'success': False
                    }, 404
 
+        obj = to_edit_row.first()
+
+        form = FormClass(MultiDict(body_of_req), obj=obj)
+        if not form.validate():
+            return {
+                       'message': form.errors,
+                       'success': False
+                   }, 404
+
         table_cols = [attr.name for attr in to_edit_row.__dict__['_raw_columns'][0].columns._all_columns]
-        to_edit_row = to_edit_row.first()
+
         for col in table_cols:
             value = body_of_req.get(col, None)
             if value:
-                setattr(to_edit_row, col, value)
-        Utils.commit_changes(manager)
+                setattr(obj, col, value)
+        Utils.add_row_to_db(obj, manager)
         return {
             'message': 'record updated',
             'success': True
