@@ -53,8 +53,7 @@ class Utils:
         for cls in all_classes:
             if cls[0] == name:
                 return cls[1]
-        # we are confident that never returns None
-        return None
+        raise Exception(f'Wrong model name ({name}) in config!')
     @staticmethod
     def init_function(config, model_name):
         return Utils.get_manager(config, model_name),\

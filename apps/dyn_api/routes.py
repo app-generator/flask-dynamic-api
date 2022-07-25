@@ -29,6 +29,11 @@ class DynamicAPI(Resource):
             return {
                        'message': 'this endpoint does not config or not exist!'
                    }, 404
+        except Exception as e:
+            print(f'An exception error occurred: {str(e)}')
+            return {
+                       'message': str(e)
+                   }, 500
         if model_id is None:
             all_objects = manager.all()
             output = [{'id': obj.id, **FormClass(obj=obj).data} for obj in all_objects]
@@ -53,6 +58,12 @@ class DynamicAPI(Resource):
             return {
                        'message': 'this endpoint does not config or not exist!'
                    }, 404
+        except Exception as e:
+            print(f'An exception error occurred: {str(e)}')
+            return {
+                       'message': str(e)
+                   }, 500
+
         body_of_req = Utils.standard_request_body(request)
         form = FormClass(MultiDict(body_of_req))
         if form.validate():
@@ -82,6 +93,12 @@ class DynamicAPI(Resource):
             return {
                        'message': 'this endpoint does not config or not exist!'
                    }, 404
+        except Exception as e:
+            print(f'An exception error occurred: {str(e)}')
+            return {
+                       'message': str(e)
+                   }, 500
+
         body_of_req = Utils.standard_request_body(request)
 
         to_edit_row = manager.filter_by(id=model_id)
@@ -121,6 +138,12 @@ class DynamicAPI(Resource):
             return {
                        'message': 'this endpoint does not config or not exist!'
                    }, 404
+        except Exception as e:
+            print(f'An exception error occurred: {str(e)}')
+            return {
+                       'message': str(e)
+                   }, 500
+
         to_delete = manager.filter_by(id=model_id)
         if to_delete.count() == 0:
             return {
