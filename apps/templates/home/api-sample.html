@@ -53,6 +53,7 @@
                 <label for="name">Name</label>
                 <input id="name" class="form-control" name="name">
             </div>
+              <div id="alert" class="d-none alert alert-danger text-light fw-bold">alert</div>
           </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -112,7 +113,8 @@
             const modelName = 'books'
             const formData = new FormData(e.target)
             let url = `/api/${modelName}/`
-
+            const alert =document.getElementById('alert')
+            alert.textContent = ''
             if (requestAction === 'put')
                 url += `${formData.get('id')}`
             else
@@ -133,8 +135,15 @@
                 .then(res => {
                     location.reload()
                     console.log(res)
+                    if (!alert.classList.contains('d-none'))
+                        alert.classList.add('d-none')
                 })
-                .catch(err => {console.log(err)})
+                .catch(err => {
+                    const errors = JSON.parse(err.toString().replace('Error: ','')).message
+                    alert.classList.remove('d-none')
+                    for (const key in errors)
+                        alert.textContent += key + ": " + errors[key]
+                })
         }
 
 </script>
