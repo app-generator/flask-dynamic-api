@@ -29,6 +29,11 @@ class DynamicAPI(Resource):
             return {
                        'message': 'this endpoint does not config or not exist!'
                    }, 404
+        except Exception as e:
+            print(f'An exception error occurred: {str(e)}')
+            return {
+                       'message': str(e)
+                   }, 500
         if model_id is None:
             all_objects = manager.all()
             output = [{'id': obj.id, **FormClass(obj=obj).data} for obj in all_objects]
@@ -53,6 +58,12 @@ class DynamicAPI(Resource):
             return {
                        'message': 'this endpoint does not config or not exist!'
                    }, 404
+        except Exception as e:
+            print(f'An exception error occurred: {str(e)}')
+            return {
+                       'message': str(e)
+                   }, 500
+
         body_of_req = Utils.standard_request_body(request)
         form = FormClass(MultiDict(body_of_req))
         if form.validate():
@@ -82,13 +93,13 @@ class DynamicAPI(Resource):
             return {
                        'message': 'this endpoint does not config or not exist!'
                    }, 404
-        body_of_req = Utils.standard_request_body(request)
-        form = FormClass(MultiDict(body_of_req))
-        if not form.validate():
+        except Exception as e:
+            print(f'An exception error occurred: {str(e)}')
             return {
-                       'message': form.errors,
-                       'success': False
-                   }, 404
+                       'message': str(e)
+                   }, 500
+
+        body_of_req = Utils.standard_request_body(request)
 
         to_edit_row = manager.filter_by(id=model_id)
 
@@ -98,13 +109,22 @@ class DynamicAPI(Resource):
                        'success': False
                    }, 404
 
+        obj = to_edit_row.first()
+
+        form = FormClass(MultiDict(body_of_req), obj=obj)
+        if not form.validate():
+            return {
+                       'message': form.errors,
+                       'success': False
+                   }, 404
+
         table_cols = [attr.name for attr in to_edit_row.__dict__['_raw_columns'][0].columns._all_columns]
-        to_edit_row = to_edit_row.first()
+
         for col in table_cols:
             value = body_of_req.get(col, None)
             if value:
-                setattr(to_edit_row, col, value)
-        Utils.commit_changes(manager)
+                setattr(obj, col, value)
+        Utils.add_row_to_db(obj, manager)
         return {
             'message': 'record updated',
             'success': True
@@ -118,6 +138,12 @@ class DynamicAPI(Resource):
             return {
                        'message': 'this endpoint does not config or not exist!'
                    }, 404
+        except Exception as e:
+            print(f'An exception error occurred: {str(e)}')
+            return {
+                       'message': str(e)
+                   }, 500
+
         to_delete = manager.filter_by(id=model_id)
         if to_delete.count() == 0:
             return {
