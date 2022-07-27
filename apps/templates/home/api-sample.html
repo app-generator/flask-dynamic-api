@@ -116,7 +116,7 @@
             const alert =document.getElementById('alert')
             alert.textContent = ''
             if (requestAction === 'put')
-                url += `${formData.get('id')}`
+                url += `${formData.get('id')}/`
             else
                 formData.delete('id')
             fetch(url,{
