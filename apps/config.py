@@ -52,6 +52,6 @@ config_dict = {
 REGISTER_MODEL_MODULE = DYNAMIC_API_MODELS_MODULE.__name__
 
 DYNAMIC_API = {
-    'books': 'Book123',
+    'books': 'Book',
     'cities': 'City',
 }
