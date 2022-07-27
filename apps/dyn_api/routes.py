@@ -103,13 +103,19 @@ class DynamicAPI(Resource):
 
         to_edit_row = manager.filter_by(id=model_id)
 
-        if to_edit_row is None:
+        if not to_edit_row:
             return {
                        'message': 'matching record not found',
                        'success': False
                    }, 404
 
         obj = to_edit_row.first()
+
+        if not obj :
+            return {
+                       'message': 'matching record not found',
+                       'success': False
+                   }, 404
 
         form = FormClass(MultiDict(body_of_req), obj=obj)
         if not form.validate():
