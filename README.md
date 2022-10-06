@@ -9,6 +9,12 @@ Flask-RestX is a popular library for developing secure API services using Flask.
 
 <br />
 
+## Video Presentation
+
+https://user-images.githubusercontent.com/51070104/194328733-3bdf8c70-f765-4168-983d-2a51e276239b.mp4
+
+<br />
+
 ## How it works
 
 The **Dynamic API** tool aims to enable a secured API service on top of any Flask codebase with a minimum effort. Here are the steps:
