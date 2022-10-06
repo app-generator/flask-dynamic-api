@@ -1,7 +1,7 @@
 # Change Log
 
-## [0.0.1] 2022-07-25
+## [1.0.0] 2022-10-06
 ### Initial release
 
-- Flag the first minimal version of the product.
- 
+- First stable version
+- The tool is now `open-source`
