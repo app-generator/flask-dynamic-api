@@ -1,17 +1,55 @@
 # Flask Dynamic API via `Flask-RestX`
 
-This tool aims to provide a secure, `production-ready API via Flask-RestX` using the developer's minimum amount of code. For newcomers, **Flask** is a leading backend framework used to code from simple websites and API's to complex eCommerce solutions.
+This tool aims to provide a secure, `production-ready API via Flask-RestX` using the developer's minimum amount of code. 
+For newcomers, **Flask** is a leading backend framework used to code from simple websites and API's to complex eCommerce solutions.
 
-Flask-RestX is a popular library for developing secure API services using Flask.
+**Flask-RestX** is a popular library for developing secure API services using Flask.
 
 - 👉 Free [support](https://appseed.us/support/) via Email and [Discord](https://discord.gg/fZC6hup)
 - 👉 More [Developer Tools](https://appseed.us/developer-tools/) - provided by AppSeed
 
-<br />
-
 ## Video Presentation
 
 https://user-images.githubusercontent.com/51070104/194328733-3bdf8c70-f765-4168-983d-2a51e276239b.mp4
+
+<br />
+
+## Manual Build 
+
+> Clone/Download Sources
+
+```bash
+$ git clone https://github.com/app-generator/flask-dynamic-api.git
+$ cd flask-dynamic-api
+```
+
+> Install Modules
+
+```bash
+$ virtualenv env
+$ source env/bin/activate
+$ pip install -r requirements.txt
+```
+
+> Update ENV 
+
+```bash
+$ export FLASK_APP=run.py
+```
+
+> Migrate DB 
+
+```bash
+$ flask db init     # INIT needs to be executed only once
+$ flask db migrate  # Needs to be executed at each DB Schema Update  
+$ flask db upgrade  # Needs to be executed at each DB Schema Update
+```
+
+> Start the project
+
+```bash
+$ flask run
+```
 
 <br />
 
